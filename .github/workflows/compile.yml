@@ -20,10 +20,13 @@ jobs:
           sudo apt-get install -y libc6:i386
 
       - name: Download pawncc
-        run: |
-          LD_LIBRARY_PATH=/tmp/pawnc/pawnc-3.10.10-linux/lib /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc "HORIZON .pwn" -oHORIZON.amx -iinclude -i/tmp/pawnc/pawnc-3.10.10-linux/include
-          mkdir -p /tmp/pawnc && tar -xzf /tmp/pawnc.tar.gz -C /tmp/pawnc
-          chmod +x /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc
+  run: |
+    curl -L -o /tmp/pawnc.tar.gz https://github.com/pawn-lang/compiler/releases/download/v3.10.10/pawnc-3.10.10-linux.tar.gz
+    mkdir -p /tmp/pawnc && tar -xzf /tmp/pawnc.tar.gz -C /tmp/pawnc
+    echo "Смотрим что распаковалось:"
+    ls -la /tmp/pawnc/
+    find /tmp/pawnc -name pawncc
+    chmod +x /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc
 
       - name: Compile
         run: |
