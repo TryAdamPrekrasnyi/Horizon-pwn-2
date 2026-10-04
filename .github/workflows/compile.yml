@@ -7,34 +7,30 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Pawn compiler
+      - name: Install 32-bit libs
         run: |
-          wget -q https://github.com/pawn-lang/compiler/releases/download/v3.10.10/pawnc-3.10.10-linux.tar.gz
-          tar -xzf pawnc-3.10.10-linux.tar.gz
-          echo "$PWD/pawnc-3.10.10-linux/bin" >> $GITHUB_PATH
-echo "LD_LIBRARY_PATH=$PWD/pawnc-3.10.10-linux/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
-      - name: Compile HORIZON.pwn
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y libc6:i386
+
+      - name: Download pawncc
         run: |
-          pawncc HORIZON.pwn -oHORIZON.amx -d3 -iinclude 2>&1 | tee compile.log
-          echo "exit_status=$?" >> $GITHUB_OUTPUT
-        id: compile
-        continue-on-error: true
+          curl -L -o /tmp/pawnc.tar.gz https://github.com/pawn-lang/compiler/releases/download/v3.10.10/pawnc-3.10.10-linux.tar.gz
+          mkdir -p /tmp/pawnc && tar -xzf /tmp/pawnc.tar.gz -C /tmp/pawnc
+          chmod +x /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc
+
+      - name: Compile
+        run: |
+          LD_LIBRARY_PATH=/tmp/pawnc/pawnc-3.10.10-linux/lib /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc HORIZON.pwn -oHORIZON.amx -iinclude -i/tmp/pawnc/pawnc-3.10.10-linux/include
 
       - name: Upload AMX
-        if: hashFiles('HORIZON.amx') != ''
         uses: actions/upload-artifact@v4
         with:
-          name: HORIZON-amx
+          name: horizon-amx
           path: HORIZON.amx
-
-      - name: Upload compile log
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: compile-log
-          path: compile.log
