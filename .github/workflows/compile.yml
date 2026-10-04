@@ -21,13 +21,13 @@ jobs:
 
       - name: Download pawncc
         run: |
-          curl -L -o /tmp/pawnc.tar.gz https://github.com/pawn-lang/compiler/releases/download/v3.10.10/pawnc-3.10.10-linux.tar.gz
+          LD_LIBRARY_PATH=/tmp/pawnc/pawnc-3.10.10-linux/lib /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc "HORIZON .pwn" -oHORIZON.amx -iinclude -i/tmp/pawnc/pawnc-3.10.10-linux/include
           mkdir -p /tmp/pawnc && tar -xzf /tmp/pawnc.tar.gz -C /tmp/pawnc
           chmod +x /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc
 
       - name: Compile
         run: |
-          LD_LIBRARY_PATH=/tmp/pawnc/pawnc-3.10.10-linux/lib /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc HORIZON.pwn -oHORIZON.amx -iinclude -i/tmp/pawnc/pawnc-3.10.10-linux/include
+          pawnc-3.10.10-linux/lib /tmp/pawnc/pawnc-3.10.10-linux/bin/pawncc HORIZON.pwn -oHORIZON.amx -iinclude -i/tmp/pawnc/pawnc-3.10.10-linux/include
 
       - name: Upload AMX
         uses: actions/upload-artifact@v4
