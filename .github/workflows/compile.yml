@@ -1,0 +1,40 @@
+name: Compile Horizon
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Pawn compiler
+        run: |
+          wget -q https://github.com/pawn-lang/compiler/releases/download/v3.10.10/pawnc-3.10.10-linux.tar.gz
+          tar -xzf pawnc-3.10.10-linux.tar.gz
+          echo "$PWD/pawnc-3.10.10-linux/bin" >> $GITHUB_PATH
+
+      - name: Compile HORIZON.pwn
+        run: |
+          pawncc HORIZON.pwn -oHORIZON.amx -d3 -iinclude 2>&1 | tee compile.log
+          echo "exit_status=$?" >> $GITHUB_OUTPUT
+        id: compile
+        continue-on-error: true
+
+      - name: Upload AMX
+        if: hashFiles('HORIZON.amx') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: HORIZON-amx
+          path: HORIZON.amx
+
+      - name: Upload compile log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compile-log
+          path: compile.log
